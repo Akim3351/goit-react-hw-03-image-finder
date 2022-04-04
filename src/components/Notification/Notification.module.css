@@ -1,0 +1,10 @@
+.notification__wrapper {
+  padding: 25px 5px;
+  display: flex;
+  justify-content: center;
+}
+
+.notification {
+  font-size: 24;
+  font-weight: 500;
+}

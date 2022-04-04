@@ -1,0 +1,5 @@
+.loader__wrapper {
+  padding: 5px;
+  display: flex;
+  justify-content: center;
+}
