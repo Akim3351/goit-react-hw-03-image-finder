@@ -3,7 +3,7 @@ import { ToastContainer } from "react-toastify";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Searchbar from "./components/Searchbar/Searchbar";
-import fetchImages from "./components/API/fetch-images";
+import fetchImages from "./services/API/fetch-images";
 import ImageGallery from "./components/ImageGallery/ImageGallery";
 import Button from "./components/Button/Button";
 import Loader from "./components/Loader/Loader";
@@ -38,14 +38,12 @@ class App extends Component {
             toast.success(`По Вашему запросу найдено ${res.total} избражений`);
             this.setState({ result: res.hits, status: "resolved" });
             if (this.state.result.length === res.total) {
-              toast.info("Достигнут конец списка");
               this.setState({ status: "endOfList" });
             }
           }
         })
         .catch((error) => this.setState({ error, status: "rejected" }));
     }
-
     if (prevPageNum !== nextPageNum && nextPageNum > 1) {
       fetchImages(nextQuery, nextPageNum)
         .then((res) => {
@@ -79,7 +77,6 @@ class App extends Component {
   };
 
   onModalOpen = (event) => {
-    console.log(event);
     this.setState({
       modalOpen: true,
       largeImg: event.target.dataset.large,
@@ -93,21 +90,21 @@ class App extends Component {
     });
   };
 
+  onError = (error) => {
+    this.setState({ error: error, status: "rejected" });
+    console.log(error);
+    // this.setState({status: "rejected" })
+  };
+
   render() {
     return (
       <div className="App">
-        {this.state.status === "idle" && <Searchbar onSubmit={this.onSubmit} />}
+        <Searchbar onSubmit={this.onSubmit} />
 
-        {this.state.status === "pending" && (
-          <>
-            <Searchbar onSubmit={this.onSubmit} />
-            <Loader />
-          </>
-        )}
+        {this.state.status === "pending" && <Loader />}
 
         {this.state.status === "resolved" && (
           <>
-            <Searchbar onSubmit={this.onSubmit} />
             <ImageGallery
               onModalOpen={this.onModalOpen}
               hits={this.state.result}
@@ -121,12 +118,10 @@ class App extends Component {
 
         {this.state.status === "endOfList" && (
           <>
-            <Searchbar onSubmit={this.onSubmit} />
             <ImageGallery
               onModalOpen={this.onModalOpen}
               hits={this.state.result}
             />
-            <ToastContainer autoClose={2000} />
             {this.state.modalOpen && (
               <Modal onClose={this.onModalClose} link={this.state.largeImg} />
             )}
@@ -134,10 +129,7 @@ class App extends Component {
         )}
 
         {this.state.status === "rejected" && (
-          <>
-            <Searchbar onSubmit={this.onSubmit} />
-            <Notification error={this.state.error} />
-          </>
+          <Notification error={this.state.error} />
         )}
 
         <ToastContainer autoClose={2000} />
