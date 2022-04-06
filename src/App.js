@@ -31,6 +31,7 @@ class App extends Component {
     if (prevQuery !== nextQuery && nextPageNum === 1) {
       fetchImages(nextQuery, nextPageNum)
         .then((res) => {
+          console.log(res);
           if (res.hits.length === 0) {
             toast.info("По Вашему запросу изображений не найдено");
             this.setState({ result: [], status: "idle" });
@@ -42,7 +43,10 @@ class App extends Component {
             }
           }
         })
-        .catch((error) => this.setState({ error, status: "rejected" }));
+        .catch((error) => {
+          console.log(error);
+          this.setState({ error, status: "rejected" });
+        });
     }
     if (prevPageNum !== nextPageNum && nextPageNum > 1) {
       fetchImages(nextQuery, nextPageNum)
@@ -93,7 +97,6 @@ class App extends Component {
   onError = (error) => {
     this.setState({ error: error, status: "rejected" });
     console.log(error);
-    // this.setState({status: "rejected" })
   };
 
   render() {

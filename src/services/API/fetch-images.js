@@ -6,9 +6,7 @@ export default async function fetchImages(searchQuery, page) {
   const OPTIONS = "image_type=photo&orientation=horizontal&safesearch=true";
   const PERPAGE = 12;
   const url = `${BASEURL}/?key=${APIKEY}&q=${searchQuery}&${OPTIONS}&page=${page}&per_page=${PERPAGE}`;
-  try {
-    const pics = await axios.get(url);
-
+  const respObj = await axios.get(url).then((pics) => {
     const hitsArray = pics.data.hits.map((pic) => {
       const { id, largeImageURL, previewURL, tags } = pic;
       return {
@@ -18,7 +16,6 @@ export default async function fetchImages(searchQuery, page) {
         tags,
       };
     });
-
     const response = {
       hits: hitsArray,
       total: pics.data.total,
@@ -26,7 +23,6 @@ export default async function fetchImages(searchQuery, page) {
       status: pics.status,
     };
     return response;
-  } catch (error) {
-    console.log(error.response.data);
-  }
+  });
+  return respObj;
 }
