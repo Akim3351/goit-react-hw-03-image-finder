@@ -28,39 +28,38 @@ class App extends Component {
     const nextPageNum = this.state.page;
     const prevImages = prevState.result;
 
-    if (prevQuery !== nextQuery && nextPageNum === 1) {
+    if (prevQuery !== nextQuery || prevPageNum !== nextPageNum) {
       fetchImages(nextQuery, nextPageNum)
         .then((res) => {
-          console.log(res);
-          if (res.hits.length === 0) {
-            toast.info("По Вашему запросу изображений не найдено");
-            this.setState({ result: [], status: "idle" });
-          } else {
-            toast.success(`По Вашему запросу найдено ${res.total} избражений`);
-            this.setState({ result: res.hits, status: "resolved" });
+          if (nextPageNum === 1) {
+            if (res.hits.length === 0) {
+              toast.info("По Вашему запросу изображений не найдено");
+              this.setState({ result: [], status: "idle" });
+            } else {
+              toast.success(
+                `По Вашему запросу найдено ${res.total} избражений`
+              );
+              this.setState({ result: res.hits, status: "resolved" });
+              if (this.state.result.length === res.total) {
+                this.setState({ status: "endOfList" });
+              }
+            }
+          }
+
+          if (nextPageNum > 1) {
+            this.setState(() => ({
+              result: [...prevImages, ...res.hits],
+              status: "resolved",
+            }));
             if (this.state.result.length === res.total) {
+              toast.info("Достигнут конец списка");
               this.setState({ status: "endOfList" });
             }
           }
         })
         .catch((error) => {
-          console.log(error);
           this.setState({ error, status: "rejected" });
         });
-    }
-    if (prevPageNum !== nextPageNum && nextPageNum > 1) {
-      fetchImages(nextQuery, nextPageNum)
-        .then((res) => {
-          this.setState(() => ({
-            result: [...prevImages, ...res.hits],
-            status: "resolved",
-          }));
-          if (this.state.result.length === res.total) {
-            toast.info("Достигнут конец списка");
-            this.setState({ status: "endOfList" });
-          }
-        })
-        .catch((error) => this.setState({ error, status: "rejected" }));
     }
   }
 
@@ -92,11 +91,6 @@ class App extends Component {
       modalOpen: false,
       largeImg: "",
     });
-  };
-
-  onError = (error) => {
-    this.setState({ error: error, status: "rejected" });
-    console.log(error);
   };
 
   render() {
